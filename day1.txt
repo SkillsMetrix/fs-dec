@@ -9,6 +9,7 @@ public class Employee {
 	private String empCity;
 
 	// getters and setters methods
+	
 	public int getEmpId() {
 		return empId;
 	}
@@ -27,12 +28,23 @@ public class Employee {
 	public void setEmpCity(String empCity) {
 		this.empCity = empCity;
 	}
-	
-	
-
-	
+	// default cons
+	public Employee() {
+		System.out.println("Inside Default Cons");
 	}
-----
+	public Employee(int empId, String empName, String empCity) {
+		 
+		this.empId = empId;
+		this.empName = empName;
+		this.empCity = empCity;
+	}
+	@Override
+	public String toString() {
+		return "Employee [empId=" + empId + ", empName=" + empName + ", empCity=" + empCity + "]";
+	}}
+
+
+--------------
 
 package com.basics;
 
@@ -49,8 +61,20 @@ public class EmployeeMain {
 		
 		System.out.println(emp1.getEmpId() + " "+emp1.getEmpName() + " " + emp1.getEmpCity());
 		
+		
+		emp2.setEmpId(102);
+		emp2.setEmpName("Manish");
+		emp2.setEmpCity("Hyderabad");
+		
+		System.out.println(emp2.getEmpId() + " "+emp2.getEmpName() + " " + emp2.getEmpCity());
+		
+		
+		Employee emp3= new Employee(103, "SAM", "NY");
+		System.out.println(emp3);
+		
 		//System.out.println(emp1.hashCode());
 		//System.out.println(emp2.hashCode());
 	}
 
 }
+
