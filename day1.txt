@@ -1,80 +1,72 @@
-package com.basics;
+package com.inheritence;
 
-public class Employee {
+public abstract class Employee {
 	
-	// define class properties
+	public abstract void addDetails();
+	public abstract String showDetails();
 	
-	private int empId;
-	private String empName;
-	private String empCity;
-
-	// getters and setters methods
-	
-	public int getEmpId() {
-		return empId;
-	}
-	public void setEmpId(int empId) {
-		this.empId = empId;
-	}
-	public String getEmpName() {
-		return empName;
-	}
-	public void setEmpName(String empName) {
-		this.empName = empName;
-	}
-	public String getEmpCity() {
-		return empCity;
-	}
-	public void setEmpCity(String empCity) {
-		this.empCity = empCity;
-	}
-	// default cons
-	public Employee() {
-		System.out.println("Inside Default Cons");
-	}
-	public Employee(int empId, String empName, String empCity) {
-		 
-		this.empId = empId;
-		this.empName = empName;
-		this.empCity = empCity;
-	}
-	@Override
-	public String toString() {
-		return "Employee [empId=" + empId + ", empName=" + empName + ", empCity=" + empCity + "]";
-	}}
-
-
---------------
-
-package com.basics;
-
-public class EmployeeMain {
-	
-	public static void main(String[] args) {
-		// creating emp obj
-		Employee emp1 = new Employee();
-		Employee emp2 = new Employee();
-		
-		emp1.setEmpId(101);
-		emp1.setEmpName("Rajesh");
-		emp1.setEmpCity("chennai");
-		
-		System.out.println(emp1.getEmpId() + " "+emp1.getEmpName() + " " + emp1.getEmpCity());
-		
-		
-		emp2.setEmpId(102);
-		emp2.setEmpName("Manish");
-		emp2.setEmpCity("Hyderabad");
-		
-		System.out.println(emp2.getEmpId() + " "+emp2.getEmpName() + " " + emp2.getEmpCity());
-		
-		
-		Employee emp3= new Employee(103, "SAM", "NY");
-		System.out.println(emp3);
-		
-		//System.out.println(emp1.hashCode());
-		//System.out.println(emp2.hashCode());
+	public void showUsers() {
+		System.out.println("User Details...!");
 	}
 
 }
+---
 
+package com.inheritence;
+
+public class Manager extends Employee{
+
+	@Override
+	public void addDetails() {
+		System.out.println("Add Manager Details");
+		
+	}
+
+	@Override
+	public String showDetails() {
+		// TODO Auto-generated method stub
+		return "Manager";
+	}
+	
+	public void showUsers() {
+		System.out.println("Manager Details...!");
+	}
+
+}
+---
+
+package com.inheritence;
+
+public class QA extends Employee{
+
+	@Override
+	public void addDetails() {
+		System.out.println("Add QA Details");
+		
+	}
+
+	@Override
+	public String showDetails() {
+		// TODO Auto-generated method stub
+		return "QA";
+	}
+
+}
+----
+
+package com.inheritence;
+
+public class InheritanceMain {
+	
+	public static void main(String[] args) {
+		
+		Employee emp1= new Manager();
+		
+		Employee emp2= new QA();
+		
+		
+		System.out.println(emp1.showDetails());
+		System.out.println(emp2.showDetails());
+	}
+
+}
