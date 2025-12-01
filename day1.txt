@@ -1,72 +1,55 @@
-package com.inheritence;
+package banking;
 
-public abstract class Employee {
+public interface RBI {
 	
-	public abstract void addDetails();
-	public abstract String showDetails();
+	public void addDeposits(int amount);
 	
-	public void showUsers() {
-		System.out.println("User Details...!");
-	}
-
-}
----
-
-package com.inheritence;
-
-public class Manager extends Employee{
-
-	@Override
-	public void addDetails() {
-		System.out.println("Add Manager Details");
-		
-	}
-
-	@Override
-	public String showDetails() {
-		// TODO Auto-generated method stub
-		return "Manager";
-	}
+	public int getBalance();
 	
-	public void showUsers() {
-		System.out.println("Manager Details...!");
-	}
-
-}
----
-
-package com.inheritence;
-
-public class QA extends Employee{
-
-	@Override
-	public void addDetails() {
-		System.out.println("Add QA Details");
-		
-	}
-
-	@Override
-	public String showDetails() {
-		// TODO Auto-generated method stub
-		return "QA";
-	}
+	public int withdrawAmount(int amount);
 
 }
 ----
+package banking;
 
-package com.inheritence;
+public class SBI implements RBI{
+	
+	public int initialBalance=1000;
 
-public class InheritanceMain {
+	@Override
+	public void addDeposits(int amount) {
+		 initialBalance =initialBalance+amount;
+		
+	}
+
+	@Override
+	public int getBalance() {
+		// TODO Auto-generated method stub
+		return initialBalance;
+	}
+
+	@Override
+	public int withdrawAmount(int amount) {
+		 initialBalance= initialBalance-amount;
+		return initialBalance;
+	}
+
+}
+
+----------
+
+package banking;
+
+public class BankingMain {
 	
 	public static void main(String[] args) {
+		RBI bank= new SBI();
 		
-		Employee emp1= new Manager();
+		System.out.println("Printing initial Balance: "+bank.getBalance());
+		System.out.println("withdraw method called ....!");
+		bank.withdrawAmount(100);
 		
-		Employee emp2= new QA();
-		
-		
-		System.out.println(emp1.showDetails());
-		System.out.println(emp2.showDetails());
+		System.out.println("Printing final Balance: "+bank.getBalance());
 	}
 
 }
