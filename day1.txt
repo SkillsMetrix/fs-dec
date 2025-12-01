@@ -1,0 +1,34 @@
+package com.lambda;
+
+public class WorkerMain {
+	
+	public static void execute(WorkerInterface worker) {
+		worker.doSomeWork();
+	}
+	
+	public static void main(String[] args) {
+		execute(new WorkerInterface() {
+			
+			@Override
+			public void doSomeWork() {
+				 System.out.println("Called using regular way");
+				
+			}
+		});
+	}
+	 
+
+}
+
+------------
+
+
+package com.lambda;
+
+
+// SAM
+public interface WorkerInterface {
+	
+	public void doSomeWork();
+
+}
