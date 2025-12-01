@@ -1,55 +1,20 @@
-package banking;
+package collectionsdemo;
 
-public interface RBI {
-	
-	public void addDeposits(int amount);
-	
-	public int getBalance();
-	
-	public int withdrawAmount(int amount);
+import java.util.ArrayList;
+import java.util.List;
 
-}
-----
-package banking;
-
-public class SBI implements RBI{
-	
-	public int initialBalance=1000;
-
-	@Override
-	public void addDeposits(int amount) {
-		 initialBalance =initialBalance+amount;
-		
-	}
-
-	@Override
-	public int getBalance() {
-		// TODO Auto-generated method stub
-		return initialBalance;
-	}
-
-	@Override
-	public int withdrawAmount(int amount) {
-		 initialBalance= initialBalance-amount;
-		return initialBalance;
-	}
-
-}
-
-----------
-
-package banking;
-
-public class BankingMain {
-	
+public class LIstDemo {
 	public static void main(String[] args) {
-		RBI bank= new SBI();
 		
-		System.out.println("Printing initial Balance: "+bank.getBalance());
-		System.out.println("withdraw method called ....!");
-		bank.withdrawAmount(100);
+		List<Employee> al= new ArrayList<Employee>();
 		
-		System.out.println("Printing final Balance: "+bank.getBalance());
+		al.add(new Employee(101, "Mukesh", "Delhi"));
+		al.add(new Employee(102, "Dipti", "Mumbai"));
+		al.add(new Employee(103, "shakti", "Indore"));
+		
+		for (Employee emp: al) {
+			System.out.println(emp);
+		}
 	}
 
 }
