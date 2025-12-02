@@ -124,3 +124,45 @@ public class BookingService {
 	
 
 }
+----------
+
+package com.project;
+
+import java.time.LocalDateTime;
+
+public class AppMain {
+
+	public static void main(String[] args) {
+		 BookingService service= new BookingService();
+		 
+//		 System.out.println("Searching flight.....!");
+//		 
+//		 service.searchFlight("Mumbai", "chennai").forEach(System.out ::println);
+//		 
+//		 System.out.println("Search with time bound");
+//		 service.searchFlightByTimeRange(LocalDateTime.now(), LocalDateTime.now().plusHours(2))
+//		 .forEach(System.out:: println);
+		 
+//		 System.out.println("Search Flight No");
+//		System.out.println(service.getFlight("AI101"));
+
+		 
+		 try {
+			service.bookPassenger("AI102", new Passengers("Santhosh", "san@mail.com"));
+			service.bookPassenger("AI102", new Passengers("Santhosh1", "san@mail.com"));
+			
+		 }catch (BookingException e) {
+			System.err.println(e.getMessage());
+		} 
+		 try {
+			service.bookPassenger("AI103", new Passengers("ram", "san@mail.com"));
+			service.bookPassenger("AI104", new Passengers("reeta", "san@mail.com"));
+			
+		 }catch (BookingException e) {
+			System.err.println(e.getMessage());
+		}
+		 
+		 service.calculateRevenue();
+	}
+
+}
