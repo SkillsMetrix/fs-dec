@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.project.Employee;
 
-public class EmployeeCrud {
+public class EmployeeCrudLambdaStream {
 
 	public static void main(String[] args) {
 		ArrayList<Employee> al = new ArrayList<Employee>();
@@ -13,17 +13,16 @@ public class EmployeeCrud {
 		al.add(new Employee(103, "Rita", 55000));
 
 		// Read all the Records
-		for (Employee emp : al) {
-			System.out.println(emp);
-		}
+		al.stream().forEach(e -> System.out.println(e));
+		
 		// read employee with id=102
 		System.out.println(" To Print specific record ");
-		for (Employee em : al) {
-			if (em.getEmpId() == 102) {
-				System.out.println(em);
-				break;
-			}
-		}
+		 Employee emp= al.stream()
+				 .filter(e -> e.getEmpId()== 102)
+				 .findFirst()
+				 .orElse(null);
+		 System.out.println(emp);
+				 
 
 		// update employee salary with id=101
 		System.out.println(" To update specific record ");
@@ -35,65 +34,9 @@ public class EmployeeCrud {
 			}
 		}
 		// delete employee
-		System.out.println(" To update specific record ");
-		for (Employee em : al) {
-			if (em.getEmpId() == 103) {
-				 al.remove(em);
-				 
-				break;
-			}
-		}
-		// Read all the Records
-				for (Employee emp : al) {
-					System.out.println(emp);
-				}
+		System.out.println(" To delete specific record ");
+		 
+		 al.removeIf(e ->e.getEmpId()== 103);
 	}
-
-}
-
----------
-
-
-package com.project;
-
-public class Employee {
-	 
-	
-	private int empId;
-	private String empName;
-	private int income;
-	public Employee(int empId, String empName, int income) {
-		super();
-		this.empId = empId;
-		this.empName = empName;
-		this.income = income;
-	}
-	
-	public int getEmpId() {
-		return empId;
-	}
-
-	public void setEmpId(int empId) {
-		this.empId = empId;
-	}
-	
-
-	public int getIncome() {
-		return income;
-	}
-
-	public void setIncome(int income) {
-		this.income = income;
-	}
-
-	@Override
-	public String toString() {
-		return "Employee [empId=" + empId + ", empName=" + empName + ", income=" + income + "]";
-	}
-
-	 
-	
-	
-	
 
 }
