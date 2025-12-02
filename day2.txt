@@ -1,69 +1,54 @@
-package com.project;
+ 
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class BookingService {
-	private List<Flight> flights;
-	
-	private DateTimeFormatter formatter= DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
-	
-	public BookingService() {
-		flights= new ArrayList<Flight>(Arrays.asList(
-				new Flight("AI101", "Delhi","Mumbai", LocalDateTime.now().plusHours(5), BigDecimal.valueOf(5500)),
-				new Flight("AI102", "Delhi","Bangalore", LocalDateTime.now().plusHours(3), BigDecimal.valueOf(6500)),
-				new Flight("AI103", "Mumbai","Chennai", LocalDateTime.now().plusHours(6), BigDecimal.valueOf(4800)),
-				new Flight("AI104", "Delhi","Mumbai", LocalDateTime.now().plusHours(2), BigDecimal.valueOf(6000))
-				));
-	}
-	public List<Flight> searchFlight(String origin,String destination){
-		return flights.stream()
-				.filter(f -> f.getOrigin().equalsIgnoreCase(origin))
-				.filter(f ->f.getDestination().equalsIgnoreCase(destination))
-				.sorted(Comparator.comparing(Flight :: getDepartureTime))
-				.collect(Collectors.toList());
-	}
-		
-	
-	public List<Flight> searchFlightByTimeRange(LocalDateTime start,LocalDateTime end){
-		return flights.stream()
-				 .filter(f -> !f.getDepartureTime().isBefore(start) && !f.getDepartureTime().isAfter(end))
-				 .collect(Collectors.toList());
-				 
-	}
-	// search flight by Flightno
-	
-		
-	
-	
+public class Flight {
+    private String flightNumber;
+    private String origin;
+    private String destination;
+    private LocalDateTime departureTime;
+    private BigDecimal price;
+    private List<Passenger> passengers;
 
-}
+     
+    public Flight(String flightNumber, String origin, String destination,
+                  LocalDateTime departureTime, BigDecimal price, List<Passenger> passengers) {
+        this.flightNumber = flightNumber;
+        this.origin = origin;
+        this.destination = destination;
+        this.departureTime = departureTime;
+        this.price = price;
+         
+        this.passengers = new ArrayList<>(passengers);
+    }
 
+    
+    public Flight(String flightNumber, String origin, String destination,
+                  LocalDateTime departureTime, BigDecimal price) {
+        this(flightNumber, origin, destination, departureTime, price, new ArrayList<>());
+    }
 
---------
-package com.project;
+    public String getFlightNumber() { return flightNumber; }
+    public String getOrigin() { return origin; }
+    public String getDestination() { return destination; }
+    public LocalDateTime getDepartureTime() { return departureTime; }
+    public BigDecimal getPrice() { return price; }
+    public List<Passenger> getPassengers() { return passengers; }
 
-import java.time.LocalDateTime;
+    public void addPassenger(Passenger passenger) {
+        passengers.add(passenger);
+    }
 
-public class AppMain {
+    public void removePassenger(String email) {
+        passengers.removeIf(p -> p.getEmail().equalsIgnoreCase(email));
+    }
 
-	public static void main(String[] args) {
-		 BookingService service= new BookingService();
-		 
-		 System.out.println("Searching flight.....!");
-		 
-		 service.searchFlight("Mumbai", "chennai").forEach(System.out ::println);
-		 
-		 System.out.println("Search with time bound");
-		 service.searchFlightByTimeRange(LocalDateTime.now(), LocalDateTime.now().plusHours(2))
-		 .forEach(System.out:: println);
-
-	}
-
+    @Override
+    public String toString() {
+        return String.format("%s (%s -> %s) %s Price: ₹%s",
+                flightNumber, origin, destination, departureTime, price);
+    }
 }
