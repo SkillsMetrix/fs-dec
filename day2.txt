@@ -114,6 +114,12 @@ public class BookingService {
 		System.out.println("✅💫 Booking COnfirmed for " + passenger.getName() + " on flight " + fno);
 	}
 		
+	public void calculateRevenue() {
+		BigDecimal total= flights.stream()
+				.map(f -> f.getPrice().multiply(BigDecimal.valueOf(f.getPassengers().size())))
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		System.out.println("💰 Total revenue "+ total);
+	}
 	
 	
 
