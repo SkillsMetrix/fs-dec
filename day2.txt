@@ -144,5 +144,13 @@ public class BookingService {
 				new Flight("AI104", "Delhi","Mumbai", LocalDateTime.now().plusHours(2), BigDecimal.valueOf(6000))
 				));
 	}
+public List<Flight> searchFlight(String origin,String destination){
+		return flights.stream()
+				.filter(f -> f.getOrigin().equalsIgnoreCase(origin))
+				.filter(f ->f.getDestination().equalsIgnoreCase(destination))
+				.sorted(Comparator.comparing(Flight :: getDepartureTime))
+				.collect(Collectors.toList());
+	}
+
 
 }
