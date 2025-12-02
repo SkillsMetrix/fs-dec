@@ -1,0 +1,39 @@
+package com.pro;
+
+import java.util.ArrayList;
+
+import com.project.Employee;
+
+public class EmployeeCrud {
+
+	public static void main(String[] args) {
+		ArrayList<Employee> al = new ArrayList<Employee>();
+		al.add(new Employee(101, "John", 50000));
+		al.add(new Employee(102, "Sam", 60000));
+		al.add(new Employee(103, "Rita", 55000));
+
+		// Read all the Records
+		for (Employee emp : al) {
+			System.out.println(emp);
+		}
+		// read employee with id=102
+		System.out.println(" To Print specific record ");
+		for (Employee em : al) {
+			if (em.getEmpId() == 102) {
+				System.out.println(em);
+				break;
+			}
+		}
+
+		// update employee salary with id=101
+		System.out.println(" To update specific record ");
+		for (Employee em : al) {
+			if (em.getEmpId() == 101) {
+				em.setIncome(55000);
+				System.out.println(em);
+				break;
+			}
+		}
+	}
+
+}
