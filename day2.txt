@@ -34,9 +34,23 @@ public class EmployeeCrud {
 				break;
 			}
 		}
+		// delete employee
+		System.out.println(" To update specific record ");
+		for (Employee em : al) {
+			if (em.getEmpId() == 103) {
+				 al.remove(em);
+				 
+				break;
+			}
+		}
+		// Read all the Records
+				for (Employee emp : al) {
+					System.out.println(emp);
+				}
 	}
 
 }
+
 ---------
 
 
