@@ -17,3 +17,16 @@ public class PaymentProcessor {
         };
     }
 }
+
+
+public class Main {
+	public static void main(String[] args) {
+		Payment p1= new UpiPayment("amar@ybl",1000);
+		Payment p2= new CardPayment("3456-4567-8908",1000);
+		Payment p3= new WalletPayment("amarwlt",1000);
+		
+		System.out.println(PaymentProcessor.process(p1));
+		System.out.println(PaymentProcessor.process(p2));
+	}
+
+}
