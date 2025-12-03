@@ -1,37 +1,19 @@
-package java17apps;
+public class PaymentProcessor {
 
-import java.util.ArrayList;
-import java.util.List;
+    public static String process(Payment payment) {    
 
-public class EmployeeMain {
+        return switch (payment) {                    
 
-	public static void main(String[] args) {
-		Employee employee= new Employee(101, "surya",10);
-		
-		 
-		System.out.println(employee.name() + " "+ employee.id());
-		System.out.println(employee.printSalary());
-		
-		List<Employee> al= new ArrayList<Employee>();
-		al.add(new Employee(101,"sushma", 1230));
-		al.add(new Employee(102,"amit", 2230));
-		
-		al.stream().filter(e -> e.salary() >2000).forEach(System.out::println);
-	}
+            case UpiPayment(String upiId, double amt) ->
+                    "Processing UPI Payment: " + upiId + " Amount=" + amt;
 
-}
----
+            case CardPayment(String card, double amt) ->
+                    "Processing Card Payment: " + card + " Amount=" + amt;
 
-package java17apps;
+            case WalletPayment w ->
+                    "Processing Wallet Payment: " + w.walletId() + " Amount=" + w.amount();
 
-public record Employee(int id, String name, double salary) {
-	
-	public double printSalary() {
-		return salary+9089;
-	}
-	public Employee{
-		if (salary <0 ) {
-			throw new IllegalArgumentException("value cant be negative");
-		}
-	}
+   
+        };
+    }
 }
