@@ -1,23 +1,37 @@
-package java11exam;
-import java.io.IOException;
-import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-public class HttpExamples {
+package java17apps;
 
-	public static void main(String[] args) throws Exception {
-		 var client= HttpClient.newHttpClient();
-		 
-		 var request= HttpRequest.newBuilder()
-				 .uri(URI.create("https://jsonplaceholder.typicode.com/users"))
-		 			.GET().build();
-		 
-		 var response= client.send(request, HttpResponse.BodyHandlers.ofString());
-		 System.out.println("Status Code: "+ response.statusCode());
-		 System.out.println("Body: "+ response.body());
-				 
+import java.util.ArrayList;
+import java.util.List;
 
+public class EmployeeMain {
+
+	public static void main(String[] args) {
+		Employee employee= new Employee(101, "surya",10);
+		
+		 
+		System.out.println(employee.name() + " "+ employee.id());
+		System.out.println(employee.printSalary());
+		
+		List<Employee> al= new ArrayList<Employee>();
+		al.add(new Employee(101,"sushma", 1230));
+		al.add(new Employee(102,"amit", 2230));
+		
+		al.stream().filter(e -> e.salary() >2000).forEach(System.out::println);
 	}
 
+}
+---
+
+package java17apps;
+
+public record Employee(int id, String name, double salary) {
+	
+	public double printSalary() {
+		return salary+9089;
+	}
+	public Employee{
+		if (salary <0 ) {
+			throw new IllegalArgumentException("value cant be negative");
+		}
+	}
 }
