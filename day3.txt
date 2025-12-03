@@ -1,20 +1,23 @@
-public class String11Combined {
-    public static void main(String[] args) {
+package java11exam;
+import java.io.IOException;
+import java.net.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+public class HttpExamples {
 
-        var message = "   Java 11\nis great!\n   ";
+	public static void main(String[] args) throws Exception {
+		 var client= HttpClient.newHttpClient();
+		 
+		 var request= HttpRequest.newBuilder()
+				 .uri(URI.create("https://jsonplaceholder.typicode.com/users"))
+		 			.GET().build();
+		 
+		 var response= client.send(request, HttpResponse.BodyHandlers.ofString());
+		 System.out.println("Status Code: "+ response.statusCode());
+		 System.out.println("Body: "+ response.body());
+				 
 
-        // strip
-        System.out.println("Stripped: '" + message.strip() + "'");
+	}
 
-        // isBlank
-        System.out.println("Blank? : " + "   ".isBlank());
-
-        // lines
-        message.lines().forEach(line -> 
-            System.out.println("LINE: " + line)
-        );
-
-        // repeat
-        System.out.println("-".repeat(20));
-    }
 }
