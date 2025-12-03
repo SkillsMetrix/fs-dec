@@ -1,0 +1,20 @@
+public class String11Combined {
+    public static void main(String[] args) {
+
+        var message = "   Java 11\nis great!\n   ";
+
+        // strip
+        System.out.println("Stripped: '" + message.strip() + "'");
+
+        // isBlank
+        System.out.println("Blank? : " + "   ".isBlank());
+
+        // lines
+        message.lines().forEach(line -> 
+            System.out.println("LINE: " + line)
+        );
+
+        // repeat
+        System.out.println("-".repeat(20));
+    }
+}
