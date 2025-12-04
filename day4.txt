@@ -1,0 +1,29 @@
+package com.project;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public record Flight (String flightNumber,String origin,String destination,LocalDateTime departureTime,BigDecimal price,List<Passenger> passengers){
+	// compact constructor : ensure passengers is a mutable list and never null
+public Flight {
+		if (passengers == null) {
+			throw new NullPointerException("Passengers must not be null");
+		}
+		var copy= new ArrayList<>(passengers);
+		
+		passengers=copy;
+	}
+public Flight(String flightNumber, String origin, String destination,
+                  LocalDateTime departureTime, BigDecimal price) {
+		this(flightNumber, origin, destination, departureTime, price, List.of());
+       }
+@Override
+    public String toString() {
+        return String.format("%s (%s -> %s) %s Price: ₹%s",
+                flightNumber, origin, destination, departureTime, price);
+    }
+public void addPassenger(Passenger p) {
+	passengers.add(p);
+}}
