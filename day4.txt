@@ -2,28 +2,45 @@ package com.project;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public record Flight (String flightNumber,String origin,String destination,LocalDateTime departureTime,BigDecimal price,List<Passenger> passengers){
-	// compact constructor : ensure passengers is a mutable list and never null
-public Flight {
-		if (passengers == null) {
-			throw new NullPointerException("Passengers must not be null");
-		}
-		var copy= new ArrayList<>(passengers);
+public class BookingService {
+	private List<Flight> flights;
+	
+	private DateTimeFormatter formatter= DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
+	
+	public BookingService() {
 		
-		passengers=copy;
+		
+		flights=new ArrayList<>(List.of(
+				new Flight("AI101", "Delhi","Mumbai", LocalDateTime.now().plusHours(5), BigDecimal.valueOf(5500),
+						List.of(new Passenger("Amar", "amar@mail.com"),
+								new Passenger("sumit", "sumit@mail.com"))),
+				
+				new Flight("AI102", "Delhi","Bangalore", LocalDateTime.now().plusHours(3), BigDecimal.valueOf(6500),
+						List.of(new Passenger("Amar", "amar@mail.com"))),
+				
+				new Flight("AI103", "Mumbai","Chennai", LocalDateTime.now().plusHours(6), BigDecimal.valueOf(4800),
+						List.of()),
+				
+				new Flight("AI104", "Delhi","Mumbai", LocalDateTime.now().plusHours(2), BigDecimal.valueOf(6000),
+						
+						List.of(new Passenger("harish", "hari@mail.com")))
+				));
 	}
-public Flight(String flightNumber, String origin, String destination,
-                  LocalDateTime departureTime, BigDecimal price) {
-		this(flightNumber, origin, destination, departureTime, price, List.of());
-       }
-@Override
-    public String toString() {
-        return String.format("%s (%s -> %s) %s Price: ₹%s",
-                flightNumber, origin, destination, departureTime, price);
-    }
-public void addPassenger(Passenger p) {
-	passengers.add(p);
-}}
+				
+				
+		public List<Flight> searchFlight(String origin,String destination){
+		return flights.stream()
+				.filter(f -> f.origin().equalsIgnoreCase(origin))
+				.filter(f ->f.destination().equalsIgnoreCase(destination))
+				.sorted(Comparator.comparing(Flight :: departureTime))
+				.collect(Collectors.toList());
+	}
+	
