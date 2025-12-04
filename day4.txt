@@ -34,7 +34,16 @@ public class BookingService {
 						List.of(new Passenger("harish", "hari@mail.com")))
 				));
 	}
-				
+		
+	public void cancelBooking(String flightno, String email) throws BookingException {
+	var flight= getFlight(flightno)
+			.orElseThrow(()-> new BookingException("Flight no not found"));
+	if(flight.removePassengerByEmail(email)) {
+		System.out.println(" ❌❌❌ Booking Cancelled for : " + email + " on flight " + flightno);
+	}else {
+		throw new BookingException("Passenger Details Not Found 😒");
+	}
+	}
 				
 		public List<Flight> searchFlight(String origin,String destination){
 		return flights.stream()
@@ -43,4 +52,51 @@ public class BookingService {
 				.sorted(Comparator.comparing(Flight :: departureTime))
 				.collect(Collectors.toList());
 	}
+		
 	
+	public List<Flight> searchFlightByTimeRange(LocalDateTime start,LocalDateTime end){
+		return flights.stream()
+				 .filter(f -> !f.departureTime().isBefore(start) && !f.departureTime().isAfter(end))
+				 .collect(Collectors.toList());
+				 
+	}
+	// search flight by Flightno
+	public Optional<Flight> getFlight(String fno){
+		return flights.stream()
+				.filter(f -> f.flightNumber().equalsIgnoreCase(fno))
+				.findFirst();
+	}
+	
+	// booking the passenger
+	
+	public void bookPassenger(String fno,Passenger passenger) throws BookingException{
+		Flight flight= getFlight(fno)
+				.orElseThrow(() -> new BookingException("Flight " + fno + " not found" ));
+		if(flight.passengers().size() >=2) {
+			throw new BookingException("Flight " + fno + " is Fully Booked");
+		}
+		flight.addPassenger(passenger);
+		System.out.println("✅💫 Booking COnfirmed for " + passenger.name() + " on flight " + fno);
+	}
+		
+	public void calculateRevenue() {
+		BigDecimal total= flights.stream()
+				.map(f -> f.price().multiply(BigDecimal.valueOf(f.passengers().size())))
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		System.out.println("💰 Total revenue "+ total);
+	}
+	
+	public void showBookings() {
+		flights.forEach(flight -> {
+			System.out.println("\n ✈️ Flight: "+ flight.flightNumber() + " (" + flight.origin() + " -> " + flight.destination() +
+					") "+ flight.departureTime().format(formatter) + " Price 💰 " +flight.price());
+			if (flight.passengers().isEmpty()) {
+				System.out.println("No Passengers booked yet");
+			}else {
+				flight.passengers().forEach(p -> System.out.println(" - "+p));
+			}
+		});
+	}
+	
+
+}
