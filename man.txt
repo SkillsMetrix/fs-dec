@@ -1,57 +1,114 @@
-package com.pack.kafkaApp;
+package com.example.kafka;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.kafka.clients.producer.*;
+
+import java.util.Properties;
+import java.util.concurrent.Future;
+
+public class ProducerWithCustomPartitioner {
+    public static void main(String[] args) throws Exception {
+        String bootstrap = "localhost:9092";
+        String topic = "custom-partition-topic";
+
+        Properties props = new Properties();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                  "org.apache.kafka.common.serialization.StringSerializer");
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                  "org.apache.kafka.common.serialization.StringSerializer");
+
+        // Tell producer to use our custom partitioner
+        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG,
+                  "com.example.kafka.CustomPartitioner");
+
+        Producer<String, String> producer = new KafkaProducer<>(props);
+
+        // messages with keys
+        String[] keys = new String[] {
+            "important-key",   // explicit -> partition 0 (per map)
+            "billing-key",     // explicit -> partition 1
+            "vip-alice",       // prefix -> partition 2
+            "user-123",        // fallback -> hashed partition
+            "user-456"
+        };
+
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+            String value = "message-" + i + " for " + key;
+            ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
+
+            // send synchronously to show partition chosen (you can use callback instead)
+            RecordMetadata meta = producer.send(record).get();
+            System.out.printf("Sent key=%s to partition=%d offset=%d%n",
+                              key, meta.partition(), meta.offset());
+        }
+
+        producer.close();
+    }
+}
+----
+
+
+package com.example.kafka;
 
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.utils.Utils;
-import org.slf4j.helpers.Util;
+
+import java.util.Map;
+import java.util.HashMap;
 
 public class CustomPartitioner implements Partitioner {
 
-	private final Map<String, Integer> keyToPartition = new HashMap<>();
+    // explicit mapping: exact key -> partition
+    private final Map<String, Integer> keyToPartition = new HashMap<>();
 
-	@Override
-	public void configure(Map<String, ?> configs) {
-		keyToPartition.put("important-key", 0); // forcing to par-1
-		keyToPartition.put("billing-key", 1); // forcing to par-1
+    @Override
+    public void configure(Map<String, ?> configs) {
+        
+        keyToPartition.put("important-key", 0);    // force to partition 0
+        keyToPartition.put("billing-key", 1);      // force to partition 1
 
-	}
+        // Example: keys with prefix "vip-" -> partition 2 (handled in partition(...) method)
+    }
 
-	@Override
-	public int partition(String topic, Object keyObj, byte[] keyBytes, Object value, byte[] valueBytes,
-			Cluster cluster) {
-		int numPartitions = cluster.partitionCountForTopic(topic);
-		if (keyObj == null) {
-			return Utils.toPositive((value == null ? 0 : value.hashCode())) % numPartitions;
-		}
-		String key = keyObj.toString();
+    @Override
+    public int partition(String topic, Object keyObj, byte[] keyBytes,
+                         Object value, byte[] valueBytes, Cluster cluster) {
 
-		// 1) exact mapping
-		if (keyToPartition.containsKey(key)) {
-			int p = keyToPartition.get(key);
-			// safety : ensure p is a valid partion index
-			if (p >= 0 && p < numPartitions)
-				return p;
-		}
-		// 2) prefix rule : key starting with VIP- go to partion 2
-		if (key.startsWith("vip-")) {
-			int p = 2 % numPartitions;
-			return p;
-		}
-		// 3) Default : hash the key)
-		if (keyBytes != null) {
-			return Utils.toPositive(Utils.murmur2(keyBytes)) % numPartitions;
-		} else {
-			return Utils.toPositive(key.hashCode()) % numPartitions;
-		}
+        int numPartitions = cluster.partitionCountForTopic(topic);
 
-	}
+        // If no key, fallback to default round-robin/hash on value
+        if (keyObj == null) {
+            // fallback: hash of value or 0
+            return Utils.toPositive((value == null ? 0 : value.hashCode())) % numPartitions;
+        }
 
-	@Override
-	public void close() {
+        String key = keyObj.toString();
 
-	}
+        // 1) Exact mapping
+        if (keyToPartition.containsKey(key)) {
+            int p = keyToPartition.get(key);
+            // safety: ensure p is a valid partition index
+            if (p >= 0 && p < numPartitions) return p;
+        }
 
+        // 2) Prefix rule: keys starting with "vip-" go to partition 2 (if exists)
+        if (key.startsWith("vip-")) {
+            int p = 2 % numPartitions; // safe if fewer partitions
+            return p;
+        }
+
+        // 3) Default: hash the key (same as default Kafka partitioner behaviour)
+        if (keyBytes != null) {
+            return Utils.toPositive(Utils.murmur2(keyBytes)) % numPartitions;
+        } else {
+            return Utils.toPositive(key.hashCode()) % numPartitions;
+        }
+    }
+
+    @Override
+    public void close() {
+        
+    }
 }
