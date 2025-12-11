@@ -1,80 +1,23 @@
-public class PaymentProducer {
-    public static void main(String[] args) throws Exception {
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                "org.apache.kafka.common.serialization.StringSerializer");
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                "org.apache.kafka.common.serialization.StringSerializer");
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example.kafka</groupId>
+  <artifactId>kafka-json-partitioner</artifactId>
+  <version>1.0</version>
 
-       
-        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG,
-                "com.example.kafka.PaymentPartitioner");
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>3.5.1</version>
+    </dependency>
 
-        Producer<String, String> producer = new KafkaProducer<>(props);
-
-        // Payment types as keys
-        String[] paymentTypes = {
-                "upi",
-                "card",
-                "cash",
-                "upi",
-                "card"
-        };
-
-        for (int i = 0; i < paymentTypes.length; i++) {
-            String key = paymentTypes[i];
-            String value = "Payment message " + i + " for " + key;
-
-            ProducerRecord<String, String> record =
-                    new ProducerRecord<>("payments-topic", key, value);
-
-            RecordMetadata meta = producer.send(record).get();
-
-            System.out.printf("Sent key=%s -> partition=%d offset=%d%n",
-                    key, meta.partition(), meta.offset());
-        }
-
-        producer.close();
-    }
-}
-
----
-
-public class PaymentParti implements Partitioner {
-
-    private final Map<String, Integer> routing = new HashMap<>();
-
-    @Override
-    public void configure(Map<String, ?> configs) {
-        routing.put("upi", 0);
-        routing.put("card", 1);
-        routing.put("cash", 2);
-    }
-
-    @Override
-    public int partition(String topic, Object keyObj, byte[] keyBytes,
-                         Object value, byte[] valueBytes, Cluster cluster) {
-
-        int numPartitions = cluster.partitionCountForTopic(topic);
-
-        if (keyObj == null) {
-            return 0; // fallback if no key
-        }
-
-        String key = keyObj.toString().toLowerCase();
-
-        // Exact match routing (upi → 0, card → 1, cash → 2)
-        if (routing.containsKey(key)) {
-            return routing.get(key) % numPartitions;
-        }
-
-        // Default fallback: hash-based
-        return Utils.toPositive(key.hashCode()) % numPartitions;
-    }
-
-    @Override
-    public void close() {}
-}
-
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.2</version>
+    </dependency>
+  </dependencies>
+</project>
