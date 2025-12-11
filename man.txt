@@ -1,75 +1,56 @@
-package com.example.kafka;
-
-import org.apache.kafka.clients.producer.*;
-
-import java.util.Properties;
-import java.util.concurrent.Future;
-
-public class ProducerWithCustomPartitioner {
+public class PaymentProducer {
     public static void main(String[] args) throws Exception {
-        String bootstrap = "localhost:9092";
-        String topic = "custom-partition-topic";
 
         Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                  "org.apache.kafka.common.serialization.StringSerializer");
+                "org.apache.kafka.common.serialization.StringSerializer");
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                  "org.apache.kafka.common.serialization.StringSerializer");
+                "org.apache.kafka.common.serialization.StringSerializer");
 
-        // Tell producer to use our custom partitioner
+       
         props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG,
-                  "com.example.kafka.CustomPartitioner");
+                "com.example.kafka.PaymentPartitioner");
 
         Producer<String, String> producer = new KafkaProducer<>(props);
 
-        // messages with keys
-        String[] keys = new String[] {
-            "important-key",   // explicit -> partition 0 (per map)
-            "billing-key",     // explicit -> partition 1
-            "vip-alice",       // prefix -> partition 2
-            "user-123",        // fallback -> hashed partition
-            "user-456"
+        // Payment types as keys
+        String[] paymentTypes = {
+                "upi",
+                "card",
+                "cash",
+                "upi",
+                "card"
         };
 
-        for (int i = 0; i < keys.length; i++) {
-            String key = keys[i];
-            String value = "message-" + i + " for " + key;
-            ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
+        for (int i = 0; i < paymentTypes.length; i++) {
+            String key = paymentTypes[i];
+            String value = "Payment message " + i + " for " + key;
 
-            // send synchronously to show partition chosen (you can use callback instead)
+            ProducerRecord<String, String> record =
+                    new ProducerRecord<>("payments-topic", key, value);
+
             RecordMetadata meta = producer.send(record).get();
-            System.out.printf("Sent key=%s to partition=%d offset=%d%n",
-                              key, meta.partition(), meta.offset());
+
+            System.out.printf("Sent key=%s -> partition=%d offset=%d%n",
+                    key, meta.partition(), meta.offset());
         }
 
         producer.close();
     }
 }
-----
 
+---
 
-package com.example.kafka;
+public class PaymentParti implements Partitioner {
 
-import org.apache.kafka.clients.producer.Partitioner;
-import org.apache.kafka.common.Cluster;
-import org.apache.kafka.common.utils.Utils;
-
-import java.util.Map;
-import java.util.HashMap;
-
-public class CustomPartitioner implements Partitioner {
-
-    // explicit mapping: exact key -> partition
-    private final Map<String, Integer> keyToPartition = new HashMap<>();
+    private final Map<String, Integer> routing = new HashMap<>();
 
     @Override
     public void configure(Map<String, ?> configs) {
-        
-        keyToPartition.put("important-key", 0);    // force to partition 0
-        keyToPartition.put("billing-key", 1);      // force to partition 1
-
-        // Example: keys with prefix "vip-" -> partition 2 (handled in partition(...) method)
+        routing.put("upi", 0);
+        routing.put("card", 1);
+        routing.put("cash", 2);
     }
 
     @Override
@@ -78,37 +59,22 @@ public class CustomPartitioner implements Partitioner {
 
         int numPartitions = cluster.partitionCountForTopic(topic);
 
-        // If no key, fallback to default round-robin/hash on value
         if (keyObj == null) {
-            // fallback: hash of value or 0
-            return Utils.toPositive((value == null ? 0 : value.hashCode())) % numPartitions;
+            return 0; // fallback if no key
         }
 
-        String key = keyObj.toString();
+        String key = keyObj.toString().toLowerCase();
 
-        // 1) Exact mapping
-        if (keyToPartition.containsKey(key)) {
-            int p = keyToPartition.get(key);
-            // safety: ensure p is a valid partition index
-            if (p >= 0 && p < numPartitions) return p;
+        // Exact match routing (upi → 0, card → 1, cash → 2)
+        if (routing.containsKey(key)) {
+            return routing.get(key) % numPartitions;
         }
 
-        // 2) Prefix rule: keys starting with "vip-" go to partition 2 (if exists)
-        if (key.startsWith("vip-")) {
-            int p = 2 % numPartitions; // safe if fewer partitions
-            return p;
-        }
-
-        // 3) Default: hash the key (same as default Kafka partitioner behaviour)
-        if (keyBytes != null) {
-            return Utils.toPositive(Utils.murmur2(keyBytes)) % numPartitions;
-        } else {
-            return Utils.toPositive(key.hashCode()) % numPartitions;
-        }
+        // Default fallback: hash-based
+        return Utils.toPositive(key.hashCode()) % numPartitions;
     }
 
     @Override
-    public void close() {
-        
-    }
+    public void close() {}
 }
+
