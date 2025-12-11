@@ -1,35 +1,57 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.example.kafka</groupId>
-  <artifactId>kafka-custom-partitioner</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <kafka.clients.version>3.7.0</kafka.clients.version>
-  </properties>
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>${kafka.clients.version}</version>
-    </dependency>
-    <!-- SLF4J API -->
-<dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-api</artifactId>
-    <version>2.0.12</version>
-</dependency>
+package com.pack.kafkaApp;
 
-<!-- Simple logger for SLF4J -->
-<dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-simple</artifactId>
-    <version>2.0.12</version>
-</dependency>
+import java.util.HashMap;
+import java.util.Map;
 
-  </dependencies>
-</project>
+import org.apache.kafka.clients.producer.Partitioner;
+import org.apache.kafka.common.Cluster;
+import org.apache.kafka.common.utils.Utils;
+import org.slf4j.helpers.Util;
+
+public class CustomPartitioner implements Partitioner {
+
+	private final Map<String, Integer> keyToPartition = new HashMap<>();
+
+	@Override
+	public void configure(Map<String, ?> configs) {
+		keyToPartition.put("important-key", 0); // forcing to par-1
+		keyToPartition.put("billing-key", 1); // forcing to par-1
+
+	}
+
+	@Override
+	public int partition(String topic, Object keyObj, byte[] keyBytes, Object value, byte[] valueBytes,
+			Cluster cluster) {
+		int numPartitions = cluster.partitionCountForTopic(topic);
+		if (keyObj == null) {
+			return Utils.toPositive((value == null ? 0 : value.hashCode())) % numPartitions;
+		}
+		String key = keyObj.toString();
+
+		// 1) exact mapping
+		if (keyToPartition.containsKey(key)) {
+			int p = keyToPartition.get(key);
+			// safety : ensure p is a valid partion index
+			if (p >= 0 && p < numPartitions)
+				return p;
+		}
+		// 2) prefix rule : key starting with VIP- go to partion 2
+		if (key.startsWith("vip-")) {
+			int p = 2 % numPartitions;
+			return p;
+		}
+		// 3) Default : hash the key)
+		if (keyBytes != null) {
+			return Utils.toPositive(Utils.murmur2(keyBytes)) % numPartitions;
+		} else {
+			return Utils.toPositive(key.hashCode()) % numPartitions;
+		}
+
+	}
+
+	@Override
+	public void close() {
+
+	}
+
+}
