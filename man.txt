@@ -1,77 +1,46 @@
-package com.example.kafka;
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example.kafka</groupId>
+  <artifactId>kafka-custom-partitioner</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <kafka.clients.version>3.7.0</kafka.clients.version>
+  </properties>
+  <dependencies>
+	  
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>${kafka.clients.version}</version>
+    </dependency>
+      <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.2</version>
+    </dependency>
+    <!-- SLF4J API -->
+     <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-streams</artifactId>
+      <version>${kafka.clients.version}</version>
+    </dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>2.0.12</version>
+</dependency>
 
-import org.apache.kafka.clients.producer.*;
+<!-- Simple logger for SLF4J -->
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>2.0.12</version>
+</dependency>
 
-import java.util.Properties;
-
-public class PaymentProducer {
-    public static void main(String[] args) throws Exception {
-
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, PaymentPartitioner.class.getName());
-
-        Producer<String, String> producer = new KafkaProducer<>(props);
-
-        String[] keys = {"upi", "card", "cash", "upi", "card"};
-
-        for (int i = 0; i < keys.length; i++) {
-            ProducerRecord<String, String> r =
-                    new ProducerRecord<>("payments-topic", keys[i], "msg-" + i);
-
-            RecordMetadata meta = producer.send(r).get();
-
-            System.out.println(keys[i] + " -> partition " + meta.partition());
-        }
-
-        producer.close();
-    }
-}
----
-
-
-package com.example.kafka;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.clients.producer.Partitioner;
-import org.apache.kafka.common.Cluster;
-import org.apache.kafka.common.utils.Utils;
-
-import java.io.InputStream;
-import java.util.Map;
-
-public class PaymentPartitioner implements Partitioner {
-
-    private Map<String, Integer> routing;
-
-    @Override
-    public void configure(Map<String, ?> configs) {
-        try {
-            InputStream is = getClass().getResourceAsStream("/routing.json");
-            routing = new ObjectMapper().readValue(is, new TypeReference<Map<String, Integer>>() {});
-        } catch (Exception e) {
-            routing = Map.of();
-        }
-    }
-
-    @Override
-    public int partition(String topic, Object keyObj, byte[] keyBytes,
-                         Object value, byte[] valueBytes, Cluster cluster) {
-
-        int count = cluster.partitionCountForTopic(topic);
-        if (keyObj == null) return 0;
-
-        String key = keyObj.toString().toLowerCase();
-
-        if (routing.containsKey(key))
-            return routing.get(key) % count;
-
-        return Utils.toPositive(key.hashCode()) % count;
-    }
-
-    @Override
-    public void close() {}
-}
+  </dependencies>
+</project>
