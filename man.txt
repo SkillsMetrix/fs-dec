@@ -1,46 +1,45 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.example.kafka</groupId>
-  <artifactId>kafka-custom-partitioner</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <kafka.clients.version>3.7.0</kafka.clients.version>
-  </properties>
-  <dependencies>
-	  
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>${kafka.clients.version}</version>
-    </dependency>
-      <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.15.2</version>
-    </dependency>
-    <!-- SLF4J API -->
-     <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-streams</artifactId>
-      <version>${kafka.clients.version}</version>
-    </dependency>
-<dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-api</artifactId>
-    <version>2.0.12</version>
-</dependency>
+package payments;
 
-<!-- Simple logger for SLF4J -->
-<dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-simple</artifactId>
-    <version>2.0.12</version>
-</dependency>
+import java.util.Properties;
 
-  </dependencies>
-</project>
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+
+public class PaymentProducer {
+	public static void main(String[] args) throws InterruptedException {
+		String bootstrap = "localhost:9092";
+        String topic = "payment-topic";
+
+        Properties props = new Properties();
+        
+        props.put("bootstrap.servers", bootstrap);
+        props.put("key.serializer",
+                  "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer",
+                  "org.apache.kafka.common.serialization.StringSerializer");
+
+        
+        KafkaProducer<String, String> p= new KafkaProducer<String, String>(props);
+        
+        String[] payments = new String[] {
+        		"{\"id\":\"p1\",\"method\":\"UPI\",\"amount\":250.50}",
+        		"{\"id\":\"p2\",\"method\":\"CARD\",\"amount\":1200.00}",
+        		"{\"id\":\"p3\",\"method\":\"CASH\",\"amount\":350.50}",
+        		"{\"id\":\"p4\",\"method\":\"UPI\",\"amount\":450.50}",
+        		"{\"id\":\"p5\",\"method\":\"CARD\",\"amount\":2150.50}",
+        };
+        for(String m:payments) {
+        	p.send(new ProducerRecord<>("payments-input",null,m));
+        	System.out.println("Sent " +m);
+        	Thread.sleep(150);
+        }
+        p.flush();
+        p.close();
+        System.out.println("Producer Done its Job....!");
+       
+   
+	}
+
+}
