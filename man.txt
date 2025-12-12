@@ -44,3 +44,53 @@ public class PaymentProducer {
 	}
 
 }
+
+
+
+-----------
+
+package csv;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
+ 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class AggregatesConsumer {
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    public static void main(String[] args) {
+        Properties props = new Properties();
+        props.put("bootstrap.servers","localhost:9092");
+        props.put("group.id","csv-reader");
+        props.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("auto.offset.reset","earliest");
+        
+        KafkaConsumer<String,String> consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(Collections.singletonList("payments-aggregates"));
+        
+        System.out.println("AggregatesConsumer started...");
+      
+            while (true) {
+                ConsumerRecords<String,String> records = consumer.poll(Duration.ofMillis(500));
+                for(ConsumerRecord<String, String> r: records) {
+                	String[] agg= r.value().split(",");
+                	 System.out.printf("%s : count=%s total=%s%n",
+                             r.key(),
+                            agg[0],
+                            agg[1]);
+                }
+                
+             
+            }}
+}
+    
+
