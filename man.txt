@@ -92,5 +92,75 @@ public class AggregatesConsumer {
              
             }}
 }
-    
+    -----
+
+
+package csv;
+
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.kstream.*;
+
+import java.util.Properties;
+
+public class PaymentStreamsCSV {
+
+    public static void main(String[] args) {
+
+        Properties props = new Properties();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "payments-csv-app");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+
+        StreamsBuilder builder = new StreamsBuilder();
+
+        // CSV: id,method,amount  (coming as plain string)
+        KStream<String, String> src = builder.stream("payments-input");
+
+        // Key by payment method (column 2)
+        KStream<String, String> keyed = src.flatMap((k, v) -> {
+            try {
+                String[] parts = v.split(",");
+                if (parts.length < 3) return java.util.List.of();
+                String method = parts[1].toUpperCase(); // UPI/CARD/CASH
+                return java.util.List.of(KeyValue.pair(method, v));
+            } catch (Exception e) {
+                return java.util.List.of();
+            }
+        });
+
+        // Minimal aggregation: count + sum(amount)
+        KTable<String, String> agg = keyed
+            .groupByKey()
+            .aggregate(
+                () -> "0,0.0",    // initial value: "count,totalAmount"
+                (method, newVal, aggVal) -> {
+                    try {
+                        String[] parts = newVal.split(",");
+                        double amount = Double.parseDouble(parts[2]); // CSV amount
+
+                        String[] aggParts = aggVal.split(",");
+                        long count = Long.parseLong(aggParts[0]);
+                        double total = Double.parseDouble(aggParts[1]);
+
+                        count += 1;
+                        total += amount;
+
+                        return count + "," + total;
+                    } catch (Exception e) {
+                        return aggVal;
+                    }
+                },
+                Materialized.with(Serdes.String(), Serdes.String())
+            );
+
+        // Write aggregates: key=method value="count,totalAmount"
+        agg.toStream().to("payments-aggregates", Produced.with(Serdes.String(), Serdes.String()));
+
+        KafkaStreams streams = new KafkaStreams(builder.build(), props);
+        streams.start();
+        System.out.println("CSV Streams App started.");
+    }
+}
 
