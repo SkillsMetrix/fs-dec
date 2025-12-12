@@ -32,3 +32,40 @@ public class PaymentStreamsApp {
                 return java.util.List.of();
             }
         });
+
+        // aggregate into a simple JSON string using String Serde (count + totalAmount)
+        KTable<String, String> agg = keyed
+            .groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
+            .aggregate(
+                () -> "{\"count\":0,\"totalAmount\":0.0}", // initializer (JSON string)
+                (method, newVal, aggVal) -> {
+                    try {
+                        JsonNode incoming = mapper.readTree(newVal);
+                        JsonNode current = mapper.readTree(aggVal);
+                        long count = current.path("count").asLong();
+                        double total = current.path("totalAmount").asDouble();
+
+                        count += 1;
+                        double amount = incoming.path("amount").asDouble(0.0);
+                        total += amount;
+
+                        return mapper.createObjectNode()
+                                .put("count", count)
+                                .put("totalAmount", total)
+                                .toString();
+                    } catch (Exception ex) {
+                        return aggVal; // on error keep previous
+                    }
+                },
+                Materialized.with(Serdes.String(), Serdes.String())
+            );
+
+        // write aggregates as stringified JSON
+        agg.toStream().to("payments-aggregates", Produced.with(Serdes.String(), Serdes.String()));
+
+        KafkaStreams streams = new KafkaStreams(builder.build(), props);
+        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+        System.out.println("Starting streams...");
+        streams.start();
+    }
+}
