@@ -1,71 +1,46 @@
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.*;
-import org.apache.kafka.streams.kstream.*;
+package csv;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Properties;
 
-public class PaymentStreamsApp {
-    private static final ObjectMapper mapper = new ObjectMapper();
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
-    public static void main(String[] args) {
+public class PaymentProducer {
+	public static void main(String[] args) throws InterruptedException, IOException {
+		String bootstrap = "localhost:9092";
+        String topic = "payment-topic";
+
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "payments-app-minimal");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        
+        props.put("bootstrap.servers", bootstrap);
+        props.put("key.serializer",
+                  "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer",
+                  "org.apache.kafka.common.serialization.StringSerializer");
 
-        StreamsBuilder builder = new StreamsBuilder();
+        
+        KafkaProducer<String, String> p= new KafkaProducer<String, String>(props);
+        
+        String csvFile="C:/data/payments.csv";
+        
+        BufferedReader br= new BufferedReader(new FileReader(csvFile));
+        String line;
+        br.readLine();
+        while((line= br.readLine()) !=null) {
+        	p.send(new ProducerRecord<>("payments-input",null,line));
+        	System.out.println("Sent "+line);
+        }
+      
+      
+        p.close();
+        System.out.println("Producer Done its Job....!");
+       
+   
+	}
 
-        // read raw JSON strings
-        KStream<String, String> src = builder.stream("payments-input", Consumed.with(Serdes.String(), Serdes.String()));
-
-        // key by method (UPI/CARD/CASH) — keep original JSON as value
-        KStream<String, String> keyed = src.flatMap((k, v) -> {
-            try {
-                JsonNode n = mapper.readTree(v);
-                String method = n.path("method").asText("").toUpperCase();
-                if (method.isEmpty()) return java.util.List.<KeyValue<String,String>>of();
-                return java.util.List.of(KeyValue.pair(method, v));
-            } catch (Exception e) {
-                return java.util.List.of();
-            }
-        });
-
-        // aggregate into a simple JSON string using String Serde (count + totalAmount)
-        KTable<String, String> agg = keyed
-            .groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
-            .aggregate(
-                () -> "{\"count\":0,\"totalAmount\":0.0}", // initializer (JSON string)
-                (method, newVal, aggVal) -> {
-                    try {
-                        JsonNode incoming = mapper.readTree(newVal);
-                        JsonNode current = mapper.readTree(aggVal);
-                        long count = current.path("count").asLong();
-                        double total = current.path("totalAmount").asDouble();
-
-                        count += 1;
-                        double amount = incoming.path("amount").asDouble(0.0);
-                        total += amount;
-
-                        return mapper.createObjectNode()
-                                .put("count", count)
-                                .put("totalAmount", total)
-                                .toString();
-                    } catch (Exception ex) {
-                        return aggVal; // on error keep previous
-                    }
-                },
-                Materialized.with(Serdes.String(), Serdes.String())
-            );
-
-        // write aggregates as stringified JSON
-        agg.toStream().to("payments-aggregates", Produced.with(Serdes.String(), Serdes.String()));
-
-        KafkaStreams streams = new KafkaStreams(builder.build(), props);
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-        System.out.println("Starting streams...");
-        streams.start();
-    }
 }
