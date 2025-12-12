@@ -43,3 +43,42 @@ public class PaymentProducer {
 	}
 
 }
+
+
+-----
+
+public class AggregatesConsumer {
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    public static void main(String[] args) {
+        Properties props = new Properties();
+        props.put("bootstrap.servers","localhost:9092");
+        props.put("group.id","agg-reader-minimal");
+        props.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("auto.offset.reset","earliest");
+        KafkaConsumer<String,String> consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(Collections.singletonList("payments-aggregates"));
+        System.out.println("AggregatesConsumer started...");
+        try {
+            while (true) {
+                ConsumerRecords<String,String> recs = consumer.poll(Duration.ofMillis(500));
+                for (ConsumerRecord<String,String> r : recs) {
+                    try {
+                        JsonNode n = mapper.readTree(r.value());
+                        System.out.printf("%s : count=%d total=%.2f%n",
+                                r.key(),
+                                n.path("count").asLong(),
+                                n.path("totalAmount").asDouble());
+                    } catch (Exception ex) {
+                        System.out.println("Invalid aggregate: " + r.value());
+                    }
+                }
+            }
+        } catch (WakeupException we) {
+            // exiting
+        } finally {
+            consumer.close();
+        }
+    }
+}
