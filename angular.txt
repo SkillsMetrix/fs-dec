@@ -1,59 +1,89 @@
-<hr>
-MyProfile: <img [src]="myprofile" width="100" height="100">
-mycity: <input type="text" [(ngModel)]="mycity">
-City: {{mycity}}
-<button (click)="addUser()">Add</button>
-
-
----
-
-
 import { Component } from '@angular/core';
+import { UserService } from '../../shared/userdata.service';
 
 @Component({
-  selector: 'app-footer',
-  templateUrl: './footer.component.html',
-  styleUrl: './footer.component.css'
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.css',
 })
-export class FooterComponent {
-  shopCart=['oil','soap','toothpaste']
-  myprofile='https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?cs=srgb&dl=pexels-bertellifotografia-3792581.jpg&fm=jpg'
-  addUser(){
-    alert('user is added')
+export class HeaderComponent {
+  constructor(private us: UserService) {
+    this.usersData = this.us.loadUsers();
   }
-  mycity='mumbai'
+
+  usersData;
+  projects = ['HRMS', 'Finance', 'Banking'];
+  courses = [
+    { id: 1, name: 'AngularApp' },
+    { id: 2, name: 'ReactApp' },
+    { id: 3, name: 'VueApp' },
+  ];
+  getColor(country: string) {
+    switch (country) {
+      case 'Australia':
+        return 'blue';
+      case 'USA':
+        return 'green';
+      case 'India':
+        return 'purple';
+      default:
+        return null;
+    }
+  }
+  people = [
+    {
+      name: 'Admin',
+      country: 'USA',
+    },
+    {
+      name: 'Manager',
+      country: 'Australia',
+    },
+    {
+      name: 'charan',
+      country: 'India',
+    },
+  ];
 }
+----
+
+
+<!-- <p>User Records with triditional way</p>
+
+<ul id="user">
+    <li *ngFor="let user of usersData">
+        {{user}}
+    </li>
+</ul>
+
+<hr>
+<ul id="pro">
+    <li *ngFor="let pro of projects">
+        {{pro}}
+    </li>
+</ul>
+
+<p>User Records with new way</p>
+
+<ul id="user">
+   @for (user of usersData; track $index) {
+    <li>{{user}}</li> 
+   }@empty {
+    <p>NO User Found</p>
+   }
+</ul>
 
 
 
------------
-
-
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { MainappComponent } from './components/mainapp/mainapp.component';
-import { HeaderComponent } from './components/header/header.component';
-import { FooterComponent } from './components/footer/footer.component';
-import { FormsModule } from '@angular/forms';
-
-@NgModule({
-
-  // it contains all the components
-  declarations: [
-    AppComponent,
-    MainappComponent,
-    HeaderComponent,
-    FooterComponent
-  ],
-  //modules
-  imports: [
-    BrowserModule,
-    AppRoutingModule,FormsModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
-export class AppModule { }
+<ul id="user">
+   @for (course of courses; track course.id) {
+    <li>{{course.name}}</li> 
+   }
+   @empty {
+    <p>NO Records Found...!</p>
+   }
+</ul>
+ -->
+<ul *ngFor="let person of people">
+    <li [ngStyle]="{'color':getColor(person.country)}">{{person.name}}</li>
+</ul>
