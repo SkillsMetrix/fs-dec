@@ -1,89 +1,26 @@
-import { Component } from '@angular/core';
-import { UserService } from '../../shared/userdata.service';
-
-@Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
-})
-export class HeaderComponent {
-  constructor(private us: UserService) {
-    this.usersData = this.us.loadUsers();
-  }
-
-  usersData;
-  projects = ['HRMS', 'Finance', 'Banking'];
-  courses = [
-    { id: 1, name: 'AngularApp' },
-    { id: 2, name: 'ReactApp' },
-    { id: 3, name: 'VueApp' },
-  ];
-  getColor(country: string) {
-    switch (country) {
-      case 'Australia':
-        return 'blue';
-      case 'USA':
-        return 'green';
-      case 'India':
-        return 'purple';
-      default:
-        return null;
-    }
-  }
-  people = [
-    {
-      name: 'Admin',
-      country: 'USA',
-    },
-    {
-      name: 'Manager',
-      country: 'Australia',
-    },
-    {
-      name: 'charan',
-      country: 'India',
-    },
-  ];
+.nav-container{
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  
 }
-----
+.navbar{
+    width: 80%;
+    max-width: 900px;
+    border-radius: 8px;
+}
 
 
-<!-- <p>User Records with triditional way</p>
-
-<ul id="user">
-    <li *ngFor="let user of usersData">
-        {{user}}
-    </li>
-</ul>
-
-<hr>
-<ul id="pro">
-    <li *ngFor="let pro of projects">
-        {{pro}}
-    </li>
-</ul>
-
-<p>User Records with new way</p>
-
-<ul id="user">
-   @for (user of usersData; track $index) {
-    <li>{{user}}</li> 
-   }@empty {
-    <p>NO User Found</p>
-   }
-</ul>
+--------
 
 
+<div class="nav-container">
+<mat-toolbar color="primary" class="navbar">
+ 
+    <span class="spacer"></span>
 
-<ul id="user">
-   @for (course of courses; track course.id) {
-    <li>{{course.name}}</li> 
-   }
-   @empty {
-    <p>NO Records Found...!</p>
-   }
-</ul>
- -->
-<ul *ngFor="let person of people">
-    <li [ngStyle]="{'color':getColor(person.country)}">{{person.name}}</li>
-</ul>
+    <button mat-raised-button color="accent">Login</button> &nbsp;&nbsp;
+    
+    <button mat-raised-button color="accent">Register</button>
+</mat-toolbar>
+</div>
