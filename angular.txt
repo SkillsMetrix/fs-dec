@@ -8,10 +8,12 @@
     width: 80%;
     max-width: 900px;
     border-radius: 8px;
+    display: flex;
+    gap: 20px;
 }
 
 
---------
+-----
 
 
 <div class="nav-container">
@@ -19,8 +21,16 @@
  
     <span class="spacer"></span>
 
-    <button mat-raised-button color="accent">Login</button> &nbsp;&nbsp;
+    <button mat-icon-button aria-label="Login" color="accent">
+        <mat-icon>login</mat-icon>
+    </button> 
     
-    <button mat-raised-button color="accent">Register</button>
+   <button mat-icon-buttoncolor="accent">
+        <mat-icon>person_add</mat-icon>
+   </button>
+
+     <button mat-raised-button color="accent">UserDetails</button> 
+    
+    <button mat-raised-button color="accent">Portfolio</button>
 </mat-toolbar>
 </div>
