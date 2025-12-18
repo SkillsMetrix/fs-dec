@@ -1,63 +1,32 @@
-<div class="container">
-  <mat-card class="register-card">
-    <mat-card-header>
-      <mat-card-title>User Registration Form</mat-card-title>
-    </mat-card-header>
-    <mat-card-content style="margin-top: 50px">
-      <form (ngSubmit)="addUser(data)" #data="ngForm">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>UserName</mat-label>
-          <input matInput name="uname" ngModel required #un="ngModel" />
+import { Component } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 
-          <div *ngIf="un.invalid && (un.dirty || un.touched)">
-            <p>Field cant be blank</p>
-          </div>
-        </mat-form-field>
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.css',
+})
+export class LoginComponent {
+  loginForm!: FormGroup;
+  uname!: FormControl;
+  password!: FormControl;
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input
-            matInput
-            type="password"
-            name="password"
-            ngModel
-            #ps="ngModel"
-            required
-            minlength="6"
-          />
-
-          <div *ngIf="ps.invalid && (ps.dirty || ps.touched)">
-            <div *ngIf="ps.errors?.['required']">
-              <p>Field cant be blank</p>
-            </div>
-            <div *ngIf="ps.errors?.['minlength']">
-              <p>Password must be 6 char long</p>
-            </div>
-          </div>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width" >
-          <mat-label>Email</mat-label>
-          <input matInput type="email" name="email" ngModel  #em="ngModel" required email/>
-            <div *ngIf="em.invalid && (em.dirty || em.touched)">
-            <div *ngIf="em.errors?.['required']">
-              <p>Field cant be blank</p>
-            </div>
-            <div *ngIf="em.errors?.['email']">
-              <p>Email Must be formatted</p>
-            </div>
-          </div>
-
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>City</mat-label>
-          <input matInput name="city" ngModel />
-        </mat-form-field>
-        <mat-card-actions>
-          <button mat-raised-button color="primary" [disabled]="data.invalid">Register</button>
-        </mat-card-actions>
-      </form>
-    </mat-card-content>
-  </mat-card>
-</div>
+  createFormControl(){
+    this.uname= new FormControl('')
+     this.password= new FormControl('')
+  }
+  createForm(){
+    this.loginForm= new FormGroup({
+      uname:this.uname,
+      password:this.password
+    })
+  }
+  constructor(){
+    this.createFormControl()
+    this.createForm()
+  }
+  login(){
+    console.log(this.loginForm.value);
+    
+  }
+}
