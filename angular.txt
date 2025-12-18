@@ -1,19 +1,51 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { RegisterComponent } from './components/register/register.component';
-import { UserdetailsComponent } from './components/userdetails/userdetails.component';
-import { PortfolioComponent } from './components/portfolio/portfolio.component';
 
-const routes: Routes = [
-  {path:'login',component:LoginComponent},
-  {path:'register',component:RegisterComponent},
-  {path:'userdetails',component:UserdetailsComponent},
-  {path:'portfolio',component:PortfolioComponent}
-];
+<div class="container">
+    <mat-card class="register-card">
+        <mat-card-header>
+            <mat-card-title>User Registration Form</mat-card-title>
+           
+        </mat-card-header>
+        <mat-card-content style="margin-top: 50px;">
+            <form>
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>UserName</mat-label>
+                    <input matInput name="uname"/>
+                </mat-form-field>
 
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }
+                 <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" name="password"/>
+                </mat-form-field>
+
+                 <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input matInput type="email" name="email"/>
+                </mat-form-field>
+
+                 <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>City</mat-label>
+                    <input matInput name="city"/>
+                </mat-form-field>
+                <mat-card-actions >
+                    <button mat-raised-button color="primary">Register</button>
+                </mat-card-actions>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+
+-------
+
+.container{
+    display: flex;
+    justify-content: center;
+    margin-top: 60px;
+}
+.register-card{
+    width: 400px;
+}
+.full-width{
+    width: 100%;
+    margin-bottom: 16px;
+}
