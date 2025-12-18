@@ -36,9 +36,18 @@
           </div>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width" >
           <mat-label>Email</mat-label>
-          <input matInput type="email" name="email" ngModel />
+          <input matInput type="email" name="email" ngModel  #em="ngModel" required email/>
+            <div *ngIf="em.invalid && (em.dirty || em.touched)">
+            <div *ngIf="em.errors?.['required']">
+              <p>Field cant be blank</p>
+            </div>
+            <div *ngIf="em.errors?.['email']">
+              <p>Email Must be formatted</p>
+            </div>
+          </div>
+
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -46,7 +55,7 @@
           <input matInput name="city" ngModel />
         </mat-form-field>
         <mat-card-actions>
-          <button mat-raised-button color="primary">Register</button>
+          <button mat-raised-button color="primary" [disabled]="data.invalid">Register</button>
         </mat-card-actions>
       </form>
     </mat-card-content>
