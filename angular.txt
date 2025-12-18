@@ -1,76 +1,21 @@
-import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
-@Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
+@Injectable({
+  providedIn: 'root'
 })
-export class LoginComponent {
-  loginForm!: FormGroup;
-  uname!: FormControl;
-  password!: FormControl;
-
-  createFormControl(){
-    this.uname= new FormControl('',Validators.required)
-     this.password= new FormControl('',Validators.required)
-  }
-  createForm(){
-    this.loginForm= new FormGroup({
-      uname:this.uname,
-      password:this.password
-    })
-  }
-  constructor(){
-    this.createFormControl()
-    this.createForm()
-  }
-  login(){
-    console.log(this.loginForm.value);
+export class FormService {
+  constructor(private http:HttpClient){}
+  addUser(user:any){
+     this.http.post('http://localhost:3000/users',user)
+     .subscribe(data=> console.log('user is added ',data)
+     )
     
   }
+  login(user:any){
+   console.log(user);
+   
+  }
+
+  
 }
-
-------------
-
-<div class="container">
-  <mat-card class="register-card">
-    <mat-card-header>
-      <mat-card-title>User Login Form</mat-card-title>
-    </mat-card-header>
-    <mat-card-content style="margin-top: 50px">
-      <form (ngSubmit)="login()" [formGroup]="loginForm">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>UserName</mat-label>
-          <input matInput formControlName="uname"/>
-
-          <div *ngIf="uname.invalid && (uname.dirty || uname.touched)">
-            <p>Field cant be blank</p>
-          </div>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input
-            matInput
-            type="password"
-            formControlName="password"
-          />
-
-          <div *ngIf="password.invalid && (password.dirty || password.touched)">
-            <div *ngIf="password.errors?.['required']">
-              <p>Field cant be blank</p>
-            </div>
-            <div *ngIf="password.errors?.['minlength']">
-              <p>Password must be 6 char long</p>
-            </div>
-          </div>
-        </mat-form-field>
- 
-        <mat-card-actions>
-          <button mat-raised-button color="primary" [disabled]="loginForm.invalid">Login</button>
-        </mat-card-actions>
-      </form>
-    </mat-card-content>
-  </mat-card>
-</div>
