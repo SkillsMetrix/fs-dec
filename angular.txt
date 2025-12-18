@@ -1,36 +1,19 @@
-.nav-container{
-    display: flex;
-    justify-content: center;
-    margin-top: 40px;
-  
-}
-.navbar{
-    width: 80%;
-    max-width: 900px;
-    border-radius: 8px;
-    display: flex;
-    gap: 20px;
-}
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
+import { UserdetailsComponent } from './components/userdetails/userdetails.component';
+import { PortfolioComponent } from './components/portfolio/portfolio.component';
 
+const routes: Routes = [
+  {path:'login',component:LoginComponent},
+  {path:'register',component:RegisterComponent},
+  {path:'userdetails',component:UserdetailsComponent},
+  {path:'portfolio',component:PortfolioComponent}
+];
 
------
-
-
-<div class="nav-container">
-<mat-toolbar color="primary" class="navbar">
- 
-    <span class="spacer"></span>
-
-    <button mat-icon-button aria-label="Login" color="accent">
-        <mat-icon>login</mat-icon>
-    </button> 
-    
-   <button mat-icon-buttoncolor="accent">
-        <mat-icon>person_add</mat-icon>
-   </button>
-
-     <button mat-raised-button color="accent">UserDetails</button> 
-    
-    <button mat-raised-button color="accent">Portfolio</button>
-</mat-toolbar>
-</div>
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
