@@ -24,3 +24,25 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
+
+
+
+--------
+
+<div class="nav-container">
+  <mat-toolbar color="primary" class="navbar">
+    <span class="spacer"></span>
+
+    <button mat-raised-button color="accent" routerLink="/portfolio/user">
+      User Portfolio
+    </button>
+    &nbsp;
+
+    <button mat-raised-button color="accent" routerLink="/portfolio/client">
+      Client Portfolio
+    </button>
+  </mat-toolbar>
+</div>
+
+<hr />
+<router-outlet></router-outlet>
