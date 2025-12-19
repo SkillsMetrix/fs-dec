@@ -1,90 +1,26 @@
-import { CanActivate } from '@angular/router';
-export class PreventRoute implements CanActivate {
-  isAllowed = false;
-  canActivate() {
-    if (!this.isAllowed) {
-      alert('UnAuthorized Access...!');
-      return false;
-    } else {
-      this.isAllowed = true;
-    }
-    return this.isAllowed;
-  }
-}
----
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
+import { UserdetailsComponent } from './components/userdetails/userdetails.component';
+import { PortfolioComponent } from './components/portfolio/portfolio.component';
+import { PreventRoute } from './shared/preventRoute';
+import { UserPortfolioComponent } from './components/user-portfolio/user-portfolio.component';
+import { ClientPortfolioComponent } from './components/client-portfolio/client-portfolio.component';
 
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { PreventRoute } from './preventRoute';
-import { Router } from '@angular/router';
+const routes: Routes = [
+  {path:'login',component:LoginComponent},
+  {path:'register',component:RegisterComponent},
+  {path:'userdetails',component:UserdetailsComponent,canActivate:[PreventRoute]},
+  {path:'portfolio',component:PortfolioComponent,canActivate:[PreventRoute],
+    children:[
+    {path:'user',component:UserPortfolioComponent},
+    {path:'client',component:ClientPortfolioComponent}
+  ]}
+];
 
-@Injectable({
-  providedIn: 'root'
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
 })
-
-export class FormService {
- 
-  constructor(private http:HttpClient,private pr:PreventRoute,private route:Router){}
-   URL='http://localhost:3000/users'
-  addUser(user:any){
-     this.http.post(this.URL,user)
-     .subscribe(data=> console.log('user is added ',data)
-     )
-    
-  }
-  loginValidate(user:any){
-   return this.http.get<any[]>(`${this.URL}?uname=${user.uname}&password=${user.password}`)
-   
-  }
-  loadUsers():Observable<any[]>{
-   return this.http.get<any[]>(this.URL)
-  }
-  isAcess(){
-    this.pr.isAllowed=true
-    this.route.navigateByUrl('/userdetails')
-  }
-
-  
-}
----
-
-import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { FormService } from '../../shared/form.service';
-import { Router } from '@angular/router'
-@Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
-})
-export class LoginComponent {
-  loginForm!: FormGroup;
-  uname!: FormControl;
-  password!: FormControl;
-
-  createFormControl(){
-    this.uname= new FormControl('',Validators.required)
-     this.password= new FormControl('',[Validators.required,Validators.minLength(6)])
-  }
-  createForm(){
-    this.loginForm= new FormGroup({
-      uname:this.uname,
-      password:this.password
-    })
-  }
-  
-  constructor(private fs:FormService,private route:Router){
-    this.createFormControl()
-    this.createForm()
-  }
- 
-  login(){
-    
-   this.fs.loginValidate(this.loginForm.value).subscribe((users:any[]) =>{
-      users?.[0] ? this.fs.isAcess() : alert('Login Failed')
-    
-    
-   })
-  }
-}
+export class AppRoutingModule { }
