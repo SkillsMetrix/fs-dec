@@ -1,46 +1,72 @@
-h2 {
-  margin: 16px 0;
-  font-weight: 500;
-  color: #333;
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormService } from '../../shared/form.service';
+import { Router } from '@angular/router'
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.css',
+})
+export class LoginComponent {
+  loginForm!: FormGroup;
+  uname!: FormControl;
+  password!: FormControl;
+
+  createFormControl(){
+    this.uname= new FormControl('',Validators.required)
+     this.password= new FormControl('',[Validators.required,Validators.minLength(6)])
+  }
+  createForm(){
+    this.loginForm= new FormGroup({
+      uname:this.uname,
+      password:this.password
+    })
+  }
+  
+  constructor(private fs:FormService,private route:Router){
+    this.createFormControl()
+    this.createForm()
+  }
+  login(){
+    
+   this.fs.loginValidate(this.loginForm.value).subscribe(users =>{
+    if(users) {
+      alert('Login Success...!')
+    }else{
+      alert('Login Failed')
+    }
+   })
+    this.route.navigateByUrl('/userdetails')
+    
+  }
 }
 
-/* Table container */
-table {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
+----------
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
-/* Header row */
-.mat-header-row {
-  background: #f5f7fa;
-}
+@Injectable({
+  providedIn: 'root'
+})
 
-.mat-header-cell {
-  font-weight: 600;
-  color: #444;
-  font-size: 14px;
-}
+export class FormService {
+ 
+  constructor(private http:HttpClient){}
+   URL='http://localhost:3000/users'
+  addUser(user:any){
+     this.http.post(this.URL,user)
+     .subscribe(data=> console.log('user is added ',data)
+     )
+    
+  }
+  loginValidate(user:any){
+   return this.http.get(`${this.URL}?uname=${user.uname}&password=${user.password}`)
+   
+  }
+  loadUsers():Observable<any[]>{
+   return this.http.get<any[]>(this.URL)
+  }
 
-/* Data cells */
-.mat-cell {
-  font-size: 13px;
-  color: #555;
-  padding: 12px 16px;
-}
-
-/* Row hover effect */
-.mat-row:hover {
-  background-color: #f9fafb;
-  cursor: pointer;
-}
-
-/* Zebra striping */
-.mat-row:nth-child(even) {
-  background-color: #fcfcfc;
-}
-
-/* Elevation refinement */
-.mat-elevation-z8 {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  
 }
