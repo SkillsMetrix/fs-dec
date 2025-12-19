@@ -45,3 +45,55 @@ displayedColumns=['id','name','email','city']
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns:displayedColumns"></tr>
 </table>
+
+
+-------
+
+import { Component } from '@angular/core';
+import { FormService } from '../../shared/form.service';
+
+@Component({
+  selector: 'app-userdetails',
+  templateUrl: './userdetails.component.html',
+  styleUrl: './userdetails.component.css'
+})
+export class UserdetailsComponent {
+displayedColumns=['id','name','email','city']
+  constructor(private us:FormService ){
+    this.loadUsersFromDB()
+  }
+  dsUsers:any[]=[]
+  loadUsersFromDB(){
+    this.us.loadUsers().subscribe(data => 
+      this.dsUsers=data
+    )
+  }
+}
+---------
+
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FormService {
+  constructor(private http:HttpClient){}
+  addUser(user:any){
+     this.http.post('http://localhost:3000/users',user)
+     .subscribe(data=> console.log('user is added ',data)
+     )
+    
+  }
+  login(user:any){
+   console.log(user);
+   
+  }
+  loadUsers():Observable<any[]>{
+   return this.http.get<any[]>('http://localhost:3000/users')
+  }
+
+  
+}
+
