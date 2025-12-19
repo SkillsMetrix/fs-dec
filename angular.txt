@@ -1,3 +1,33 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+export class FormService {
+ 
+  constructor(private http:HttpClient){}
+   URL='http://localhost:3000/users'
+  addUser(user:any){
+     this.http.post(this.URL,user)
+     .subscribe(data=> console.log('user is added ',data)
+     )
+    
+  }
+  loginValidate(user:any){
+   return this.http.get<any[]>(`${this.URL}?uname=${user.uname}&password=${user.password}`)
+   
+  }
+  loadUsers():Observable<any[]>{
+   return this.http.get<any[]>(this.URL)
+  }
+
+  
+}
+----------
+
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FormService } from '../../shared/form.service';
@@ -27,46 +57,13 @@ export class LoginComponent {
     this.createFormControl()
     this.createForm()
   }
+ 
   login(){
     
-   this.fs.loginValidate(this.loginForm.value).subscribe(users =>{
-    if(users) {
-      alert('Login Success...!')
-    }else{
-      alert('Login Failed')
-    }
+   this.fs.loginValidate(this.loginForm.value).subscribe((users:any[]) =>{
+      users?.[0] ?  this.route.navigateByUrl('/userdetails') : alert('Login Failed')
+    
+    
    })
-    this.route.navigateByUrl('/userdetails')
-    
   }
-}
-
-----------
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-
-@Injectable({
-  providedIn: 'root'
-})
-
-export class FormService {
- 
-  constructor(private http:HttpClient){}
-   URL='http://localhost:3000/users'
-  addUser(user:any){
-     this.http.post(this.URL,user)
-     .subscribe(data=> console.log('user is added ',data)
-     )
-    
-  }
-  loginValidate(user:any){
-   return this.http.get(`${this.URL}?uname=${user.uname}&password=${user.password}`)
-   
-  }
-  loadUsers():Observable<any[]>{
-   return this.http.get<any[]>(this.URL)
-  }
-
-  
 }
