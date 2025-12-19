@@ -1,21 +1,47 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Component } from '@angular/core';
+import { FormService } from '../../shared/form.service';
 
-@Injectable({
-  providedIn: 'root'
+@Component({
+  selector: 'app-userdetails',
+  templateUrl: './userdetails.component.html',
+  styleUrl: './userdetails.component.css'
 })
-export class FormService {
-  constructor(private http:HttpClient){}
-  addUser(user:any){
-     this.http.post('http://localhost:3000/users',user)
-     .subscribe(data=> console.log('user is added ',data)
-     )
-    
+export class UserdetailsComponent {
+displayedColumns=['id','name','email','city']
+  constructor(private us:FormService ){
+    this.loadUsersFromDB()
   }
-  login(user:any){
-   console.log(user);
-   
+  dsUsers:any[]=[]
+  loadUsersFromDB(){
+    this.us.loadUsers().subscribe(data => 
+      this.dsUsers=data
+    )
   }
-
-  
 }
+--------
+
+
+<p>User Details</p>
+<table mat-table [dataSource]="dsUsers" class="mat-elevation-z8">
+    <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+         <td mat-cell *matCellDef="let user">{{user.id}}</td>
+    </ng-container>
+
+     <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+         <td mat-cell *matCellDef="let user">{{user.uname}}</td>
+    </ng-container>
+
+     <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+         <td mat-cell *matCellDef="let user">{{user.email}}</td>
+    </ng-container>
+
+     <ng-container matColumnDef="city">
+        <th mat-header-cell *matHeaderCellDef>City</th>
+         <td mat-cell *matCellDef="let user">{{user.city}}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns:displayedColumns"></tr>
+</table>
