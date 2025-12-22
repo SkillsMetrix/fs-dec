@@ -1,48 +1,14 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { RegisterComponent } from './components/register/register.component';
-import { UserdetailsComponent } from './components/userdetails/userdetails.component';
-import { PortfolioComponent } from './components/portfolio/portfolio.component';
-import { PreventRoute } from './shared/preventRoute';
-import { UserPortfolioComponent } from './components/user-portfolio/user-portfolio.component';
-import { ClientPortfolioComponent } from './components/client-portfolio/client-portfolio.component';
-
-const routes: Routes = [
-  {path:'login',component:LoginComponent},
-  {path:'register',component:RegisterComponent},
-  {path:'userdetails',component:UserdetailsComponent,canActivate:[PreventRoute]},
-  {path:'portfolio',component:PortfolioComponent,canActivate:[PreventRoute],
-    children:[
-    {path:'user',component:UserPortfolioComponent},
-    {path:'client',component:ClientPortfolioComponent}
-  ]}
-];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
+import { Observable } from "rxjs";
 
 
 
---------
+export class Logger implements HttpInterceptor{
 
-<div class="nav-container">
-  <mat-toolbar color="primary" class="navbar">
-    <span class="spacer"></span>
-
-    <button mat-raised-button color="accent" routerLink="/portfolio/user">
-      User Portfolio
-    </button>
-    &nbsp;
-
-    <button mat-raised-button color="accent" routerLink="/portfolio/client">
-      Client Portfolio
-    </button>
-  </mat-toolbar>
-</div>
-
-<hr />
-<router-outlet></router-outlet>
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        
+        console.log('Requested URL ' + req.url) ;
+        return next.handle(req)
+        
+    }
+}
