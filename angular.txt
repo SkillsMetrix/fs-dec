@@ -1,11 +1,12 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import { Directive, ElementRef, Renderer2 } from "@angular/core";
 
-@Pipe({
-    name:'summary',
+
+@Directive({
+    selector: '[cc]',
     standalone:true
 })
-export class Summary implements PipeTransform{
-    transform(value: string) {
-            return value.substring(0,10) + '..... read more'
+export class ColorChanger{
+    constructor(private ref:ElementRef,private ren:Renderer2){
+            this.ren.setStyle(this.ref.nativeElement,'backgroundColor','blue')
     }
 }
