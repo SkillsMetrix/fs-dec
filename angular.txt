@@ -1,12 +1,27 @@
-import { Directive, ElementRef, Renderer2 } from "@angular/core";
-
+import { Directive, ElementRef, HostBinding, HostListener, Renderer2 } from '@angular/core';
 
 @Directive({
-    selector: '[cc]',
-    standalone:true
+  selector: '[cc]',
+  standalone: true,
 })
-export class ColorChanger{
-    constructor(private ref:ElementRef,private ren:Renderer2){
-            this.ren.setStyle(this.ref.nativeElement,'backgroundColor','blue')
-    }
+export class ColorChanger {
+  /* constructor(private ref:ElementRef,private ren:Renderer2){
+            this.ren.setStyle(this.ref.nativeElement,'backgroundColor','pink')
+    } */
+
+  defaultColor = 'white';
+
+  @HostListener('mouseenter')
+  addColor() {
+    this.defaultColor = 'pink';
+  }
+  
+  @HostListener('mouseleave')
+  removeColor() {
+    this.defaultColor='white';
+  }
+  @HostBinding('style.backgroundColor')
+  get applyStyle() {
+    return this.defaultColor;
+  }
 }
