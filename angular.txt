@@ -1,41 +1,11 @@
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Pipe, PipeTransform } from "@angular/core";
 
-
-
-export class Logger implements HttpInterceptor{
-
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        
-        console.log('Requested URL ' + req.url) ;
-        return next.handle(req)
-        
-    }
-}
-
-
-
---------
-
-import { HttpEvent, HttpEventType, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
-import { Observable, tap } from "rxjs";
-
-
-
-export class ResponseApp implements HttpInterceptor{
-
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        
-      
-        return next.handle(req).pipe(
-            tap(event => {
-                if(event.type == HttpEventType.Response){
-                    event.body.title='response recieved'
-                    console.log("Response from server ",event.body.title);
-                    
-                }
-            })
-        )
-        
+@Pipe({
+    name:'summary',
+    standalone:true
+})
+export class Summary implements PipeTransform{
+    transform(value: string) {
+            return value.substring(0,10) + '..... read more'
     }
 }
