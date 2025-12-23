@@ -1,20 +1,24 @@
-package com.example.angular_backend;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Service
-public class PaymentProducer {
+@RestController
+@RequestMapping("/payments")
+public class AppController {
 	
-	private final KafkaTemplate<String, Payment> kafkaTemplate;
+	private final PaymentProducer producer;
+	private final List<User> users= new ArrayList<User>();
 	
-	public PaymentProducer(KafkaTemplate<String, Payment> kafkaTemplate) {
-		this.kafkaTemplate=kafkaTemplate;
+	public AppController(PaymentProducer producer) {
+		 
+		this.producer = producer;
 	}
-	
-	public void send(Payment payment) {
-		kafkaTemplate.send("payment-topic",payment.paymentId(),payment);
+	@GetMapping("/welcome")
+	public String sayWelcome() {
+		return "Welcome to Payment Application";
 	}
-	
-
-}
