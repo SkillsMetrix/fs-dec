@@ -1,27 +1,20 @@
-import { Directive, ElementRef, HostBinding, HostListener, Renderer2 } from '@angular/core';
+package com.example.angular_backend;
 
-@Directive({
-  selector: '[cc]',
-  standalone: true,
-})
-export class ColorChanger {
-  /* constructor(private ref:ElementRef,private ren:Renderer2){
-            this.ren.setStyle(this.ref.nativeElement,'backgroundColor','pink')
-    } */
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
 
-  defaultColor = 'white';
+@Service
+public class PaymentProducer {
+	
+	private final KafkaTemplate<String, Payment> kafkaTemplate;
+	
+	public PaymentProducer(KafkaTemplate<String, Payment> kafkaTemplate) {
+		this.kafkaTemplate=kafkaTemplate;
+	}
+	
+	public void send(Payment payment) {
+		kafkaTemplate.send("payment-topic",payment.paymentId(),payment);
+	}
+	
 
-  @HostListener('mouseenter')
-  addColor() {
-    this.defaultColor = 'pink';
-  }
-  
-  @HostListener('mouseleave')
-  removeColor() {
-    this.defaultColor='white';
-  }
-  @HostBinding('style.backgroundColor')
-  get applyStyle() {
-    return this.defaultColor;
-  }
 }
