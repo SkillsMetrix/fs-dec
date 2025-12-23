@@ -1,11 +1,67 @@
-spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: payment-group
-      auto-offset-reset: earliest
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-    producer:
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+import { Component } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { MaterialModule } from '../../material.module';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-register',
+  standalone: true,
+  imports: [FormsModule,MaterialModule,CommonModule],
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.css'
+})
+export class RegisterComponent {
+
+  addUser(nf:NgForm){
+      console.log(nf.value);
+      
+  }
+}
+-------------
+
+
+
+
+
+<div class="container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>User Registration Form</mat-card-title>
+    </mat-card-header>
+    <mat-card-content style="margin-top: 50px">
+      <form (ngSubmit)="addUser(data)" #data="ngForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>UserName</mat-label>
+          <input matInput name="username" ngModel required #un="ngModel" />
+
+          <div *ngIf="un.invalid && (un.dirty || un.touched)">
+            <p>Field cant be blank</p>
+          </div>
+        </mat-form-field>
+
+      
+        <mat-form-field appearance="outline" class="full-width" >
+          <mat-label>Email</mat-label>
+          <input matInput type="email" name="email" ngModel  #em="ngModel" required email/>
+            <div *ngIf="em.invalid && (em.dirty || em.touched)">
+            <div *ngIf="em.errors?.['required']">
+              <p>Field cant be blank</p>
+            </div>
+            <div *ngIf="em.errors?.['email']">
+              <p>Email Must be formatted</p>
+            </div>
+          </div>
+
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ID</mat-label>
+          <input matInput name="id" ngModel />
+        </mat-form-field>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" [disabled]="data.invalid">Register</button>
+        </mat-card-actions>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
