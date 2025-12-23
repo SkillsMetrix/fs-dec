@@ -15,76 +15,43 @@ export class FormService {
     .subscribe(data => console.log(data)
     )
   }
+  pay(payment:any){
+    return this.http.post('http://localhost:8080/payments/pay',payment)
+  }
 }
------------
+----------
 
 import { Component } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
-import { MaterialModule } from '../../material.module';
-import { CommonModule } from '@angular/common';
-import { FormService } from '../../shared/form.service';
+import { RouterOutlet } from '@angular/router';
+import { RegisterComponent } from './components/register/register.component';
+import { FormService } from './shared/form.service';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-root',
   standalone: true,
-  imports: [FormsModule,MaterialModule,CommonModule],
-  templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  imports: [RouterOutlet, RegisterComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css',
 })
-export class RegisterComponent {
-
-  addUser(nf:NgForm){
-     this.fs.register(nf.value);
-      
+export class AppComponent {
+  title = 'kafka-client';
+  constructor(private fs: FormService) {}
+  payToConsumer(type: string) {
+    this.fs
+      .pay({
+        paymentId: '101',
+        userId: '201',
+        type,
+        amount: 400,
+      })
+      .subscribe();
   }
-  constructor(private fs:FormService){}
 }
-------
+-----
 
 
+<app-register></app-register>
 
 
-
-
-<div class="container">
-  <mat-card class="register-card">
-    <mat-card-header>
-      <mat-card-title>User Registration Form</mat-card-title>
-    </mat-card-header>
-    <mat-card-content style="margin-top: 50px">
-      <form (ngSubmit)="addUser(data)" #data="ngForm">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>UserName</mat-label>
-          <input matInput name="username" ngModel required #un="ngModel" />
-
-          <div *ngIf="un.invalid && (un.dirty || un.touched)">
-            <p>Field cant be blank</p>
-          </div>
-        </mat-form-field>
-
-      
-        <mat-form-field appearance="outline" class="full-width" >
-          <mat-label>Email</mat-label>
-          <input matInput type="email" name="email" ngModel  #em="ngModel" required email/>
-            <div *ngIf="em.invalid && (em.dirty || em.touched)">
-            <div *ngIf="em.errors?.['required']">
-              <p>Field cant be blank</p>
-            </div>
-            <div *ngIf="em.errors?.['email']">
-              <p>Email Must be formatted</p>
-            </div>
-          </div>
-
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>ID</mat-label>
-          <input matInput name="id" ngModel />
-        </mat-form-field>
-        <mat-card-actions>
-          <button mat-raised-button color="primary" [disabled]="data.invalid">Register</button>
-        </mat-card-actions>
-      </form>
-    </mat-card-content>
-  </mat-card>
-</div>
+<hr>
+<button (click)="payToConsumer('UPI')">Pay UPI</button>
