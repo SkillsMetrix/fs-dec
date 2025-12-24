@@ -1,28 +1,46 @@
-public sealed abstract class Payment
-        permits UpiPayment, CardPayment, CashPayment {
+package com.model;
 
-    public abstract String paymentId();
-    public abstract String userId();
-    public abstract double amount();
+
+public sealed interface Payment permits UpiPayment,CardPayment,CashPayment{
+	public String paymentId();
+	public String userId();
+	public double amount();
 }
 
 
---
+---------
 
-public final record UpiPayment(
-        String paymentId,
-        String userId,
-        double amount,
-        String upiId
-) extends Payment {}
+package com.model;
+
+public final record UpiPayment (
+		
+		String paymentId,
+		String userId,
+		double amount,
+		String upiId
+		
+		) implements Payment{}
 
 
------
 
+package com.model;
+
+public final record CashPayment(
+		String paymentId,
+		String userId,
+		double amount
+	)implements Payment{}
+
+
+
+
+package com.model;
 
 public final record CardPayment(
-        String paymentId,
-        String userId,
-        double amount,
-        String cardNumber
-) extends Payment {}
+		String paymentId,
+		String userId,
+		double amount,
+		String cardNumber
+		
+		
+		)implements Payment{}
