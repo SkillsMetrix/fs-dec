@@ -1,57 +1,28 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+public sealed abstract class Payment
+        permits UpiPayment, CardPayment, CashPayment {
 
-@Injectable({
-  providedIn: 'root',
-
-})
-
-export class FormService {
-
-  constructor(private http:HttpClient) { }
-
-  register(data:any){
-    this.http.post('http://localhost:8080/payments/register',data)
-    .subscribe(data => console.log(data)
-    )
-  }
-  pay(payment:any){
-    return this.http.post('http://localhost:8080/payments/pay',payment)
-  }
+    public abstract String paymentId();
+    public abstract String userId();
+    public abstract double amount();
 }
-----------
 
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { RegisterComponent } from './components/register/register.component';
-import { FormService } from './shared/form.service';
 
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, RegisterComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
-})
-export class AppComponent {
-  title = 'kafka-client';
-  constructor(private fs: FormService) {}
-  payToConsumer(type: string) {
-    this.fs
-      .pay({
-        paymentId: '101',
-        userId: '201',
-        type,
-        amount: 400,
-      })
-      .subscribe();
-  }
-}
+--
+
+public final record UpiPayment(
+        String paymentId,
+        String userId,
+        double amount,
+        String upiId
+) extends Payment {}
+
+
 -----
 
 
-<app-register></app-register>
-
-
-<hr>
-<button (click)="payToConsumer('UPI')">Pay UPI</button>
+public final record CardPayment(
+        String paymentId,
+        String userId,
+        double amount,
+        String cardNumber
+) extends Payment {}
